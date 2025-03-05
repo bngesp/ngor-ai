@@ -1,29 +1,45 @@
-import logging
 import openai
-from config.settings import settings
+import logging
+from config.settings import OPENAI_API_KEY
 
-openai.api_key = settings.openai_api_key
+openai.api_key = OPENAI_API_KEY
 
-def load_base_prompt():
-    with open("prompts/base_prompt.md", "r", encoding="utf-8") as f:
-        return f.read()
 
 def review_file_content(file_path, content):
-    try:
-        base_prompt = load_base_prompt()
-        full_prompt = base_prompt.format(file_path=file_path, content=content)
+    prompt = f"""
+    Tu es un expert en code review. Analyse le fichier {file_path} et signale les lignes problématiques.
 
+    Format attendu:
+    ligne: numéro | commentaire: explication claire du problème
+
+    Contenu du fichier:
+    {content}
+    """
+
+    try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Tu es un tech lead expert qui fait des revues de code."},
-                {"role": "user", "content": full_prompt}
+                {"role": "system", "content": "Tu es un tech lead qui fait des revues de code."},
+                {"role": "user", "content": prompt}
             ]
         )
 
-        review = response['choices'][0]['message']['content']
-        return f"### Review de code pour {file_path} :\n\n{review}"
+        review_text = response['choices'][0]['message']['content']
+        comments = {}
+
+        for line in review_text.split("\n"):
+            if line.startswith("ligne:"):
+                try:
+                    parts = line.split("|")
+                    line_number = int(parts[0].split(":")[1].strip())
+                    comment = parts[1].split("commentaire:")[1].strip()
+                    comments[line_number] = comment
+                except Exception as e:
+                    logging.warning(f"Impossible de parser la ligne: {line}")
+
+        return comments
 
     except Exception as e:
-        logging.error(f"Erreur lors de la review LLM : {e}")
-        return "Impossible de générer une review pour ce fichier."
+        logging.error(f"Erreur lors de la review par LLM: {e}")
+        return {}

@@ -1,12 +1,13 @@
-from pydantic import BaseSettings
+import os
+from dotenv import load_dotenv
 
-class Settings(BaseSettings):
-    gitlab_api_base_url: str
-    gitlab_project_id: str
-    gitlab_project_token: str
-    openai_api_key: str
+load_dotenv()
 
-    class Config:
-        env_file = ".env"
+GITLAB_API_BASE_URL = os.getenv("GITLAB_API_BASE_URL")
+GITLAB_PROJECT_ID = os.getenv("GITLAB_PROJECT_ID")
+GITLAB_PROJECT_TOKEN = os.getenv("GITLAB_PROJECT_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-settings = Settings()
+HEADERS = {
+    "PRIVATE-TOKEN": GITLAB_PROJECT_TOKEN
+}
