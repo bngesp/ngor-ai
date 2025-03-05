@@ -5,7 +5,8 @@ import logging
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
-openai.api_key = config['openai']['api_key']
+#openai.api_key = config['openai']['api_key']
+openai.api_key = "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"
 
 def review_file_content(file_path, content):
     """
