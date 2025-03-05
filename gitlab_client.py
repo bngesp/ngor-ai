@@ -38,3 +38,20 @@ def get_file_content(branch, file_path):
     file_data = response.json()
     import base64
     return base64.b64decode(file_data['content']).decode('utf-8')
+
+
+def post_comment(mr_iid, comment):
+    """
+    Poste un commentaire sur la Merge Request spécifiée.
+    """
+    url = f"{GITLAB_API_BASE}/projects/{PROJECT_ID}/merge_requests/{mr_iid}/notes"
+    data = {
+        "body": comment
+    }
+    response = requests.post(url, headers=HEADERS, data=data)
+
+    if response.status_code != 201:
+        logging.error(f"Erreur lors du post du commentaire: {response.status_code} - {response.text}")
+        return None
+
+    return response.json()
