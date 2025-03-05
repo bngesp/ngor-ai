@@ -1,3 +1,6 @@
 gitlab:
   token: "glpat-dLjQpAJfGWm19YHK9VZE"  # Token d’accès perso ou de service
   project_id: "67696444" # ID du projet GitLab cible
+
+openai:
+  api_key: "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"  # Clé d’API OpenAI
