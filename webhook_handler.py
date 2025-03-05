@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Request
 import yaml
 import logging
+from gitlab_client import get_changed_files
 
-# Charger la config
 with open("config.yml", "r") as f:
     config = yaml.safe_load(f)
 
 app = FastAPI()
-
 logging.basicConfig(level=logging.INFO)
 
 @app.post("/webhook")
@@ -17,9 +16,12 @@ async def handle_webhook(request: Request):
 
     if event_type == "Merge Request Hook":
         mr = payload['object_attributes']
-        logging.info(f"Nouvelle MR reçue: {mr['title']} (#{mr['id']})")
-        logging.info(f"Description: {mr['description']}")
-        logging.info(f"Source branch: {mr['source_branch']} → Target branch: {mr['target_branch']}")
-        logging.info(f"MR Status: {mr['state']}")
+        mr_iid = mr['iid']  # Important : c'est l'IID, pas l'ID global
+
+        logging.info(f"Nouvelle MR reçue: {mr['title']} (IID: {mr_iid})")
+
+        # Récupérer les fichiers modifiés
+        changed_files = get_changed_files(mr_iid)
+        logging.info(f"Fichiers modifiés: {changed_files}")
 
     return {"status": "received"}
