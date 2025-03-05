@@ -1,22 +1,12 @@
 import logging
-import os
-
 import requests
-from dotenv import load_dotenv
+from config.settings import settings
+import base64
 
-load_dotenv()
-
-
-GITLAB_API_BASE = os.getenv("GITLAB_API_BASE_URL")#"https://gitlab.com/api/v4"
-PROJECT_ID = os.getenv("GITLAB_PROJECT_ID")   #config['gitlab']['project_id']
-PRIVATE_TOKEN =  os.getenv("GITLAB_PROJECT_TOKEN") #config['gitlab']['token']
-
-HEADERS = {
-    "PRIVATE-TOKEN": PRIVATE_TOKEN
-}
+HEADERS = {"PRIVATE-TOKEN": settings.gitlab_project_token}
 
 def get_changed_files(mr_iid):
-    url = f"{GITLAB_API_BASE}/projects/{PROJECT_ID}/merge_requests/{mr_iid}/changes"
+    url = f"{settings.gitlab_api_base_url}/projects/{settings.gitlab_project_id}/merge_requests/{mr_iid}/changes"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code != 200:
@@ -27,10 +17,7 @@ def get_changed_files(mr_iid):
     return [change['new_path'] for change in data['changes']]
 
 def get_file_content(branch, file_path):
-    """
-    Récupère le contenu d'un fichier sur une branche donnée.
-    """
-    url = f"{GITLAB_API_BASE}/projects/{PROJECT_ID}/repository/files/{file_path}?ref={branch}"
+    url = f"{settings.gitlab_api_base_url}/projects/{settings.gitlab_project_id}/repository/files/{file_path}?ref={branch}"
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code != 200:
@@ -38,18 +25,11 @@ def get_file_content(branch, file_path):
         return None
 
     file_data = response.json()
-    import base64
     return base64.b64decode(file_data['content']).decode('utf-8')
 
-
 def post_comment(mr_iid, comment):
-    """
-    Poste un commentaire sur la Merge Request spécifiée.
-    """
-    url = f"{GITLAB_API_BASE}/projects/{PROJECT_ID}/merge_requests/{mr_iid}/notes"
-    data = {
-        "body": comment
-    }
+    url = f"{settings.gitlab_api_base_url}/projects/{settings.gitlab_project_id}/merge_requests/{mr_iid}/notes"
+    data = {"body": comment}
     response = requests.post(url, headers=HEADERS, data=data)
 
     if response.status_code != 201:
