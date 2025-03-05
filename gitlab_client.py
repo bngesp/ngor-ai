@@ -1,13 +1,15 @@
-import yaml
-import requests
 import logging
+import os
 
-with open("config.yml", "r") as f:
-    config = yaml.safe_load(f)
+import requests
+from dotenv import load_dotenv
 
-GITLAB_API_BASE = "https://gitlab.com/api/v4"
-PROJECT_ID = config['gitlab']['project_id']
-PRIVATE_TOKEN = config['gitlab']['token']
+load_dotenv()
+
+
+GITLAB_API_BASE = os.getenv("GITLAB_API_BASE_URL")#"https://gitlab.com/api/v4"
+PROJECT_ID = os.getenv("GITLAB_PROJECT_ID")   #config['gitlab']['project_id']
+PRIVATE_TOKEN =  os.getenv("GITLAB_PROJECT_TOKEN") #config['gitlab']['token']
 
 HEADERS = {
     "PRIVATE-TOKEN": PRIVATE_TOKEN

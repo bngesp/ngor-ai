@@ -4,9 +4,6 @@ import logging
 from gitlab_client import get_changed_files, get_file_content, post_comment
 from llm_agent import review_file_content
 
-with open("config.yml", "r") as f:
-    config = yaml.safe_load(f)
-
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
