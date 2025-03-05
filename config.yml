@@ -1,0 +1,3 @@
+gitlab:
+  token: "GLPAT-XXXXXX"  # Token d’accès perso ou de service
+  project_id: "12345678" # ID du projet GitLab cible
