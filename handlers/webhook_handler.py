@@ -10,6 +10,7 @@ app = FastAPI()
 @app.post("/webhook")
 async def webhook(request: Request):
     payload = await request.json()
+    logging.info(f"Requête reçue: {payload}")
     if request.headers.get("X-Gitlab-Event") != "Merge Request Hook":
         return {"status": "ignored"}
 
