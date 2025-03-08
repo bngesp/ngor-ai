@@ -27,7 +27,7 @@ async def webhook(request: Request):
         #     start_sha=mr_data['diff_refs']['start_sha'],
         #     head_sha=mr_data['diff_refs']['head_sha']
         # )
-
+        logging.info(f"Fichiers modifiés: {changed_files}")
         # process_merge_request(mr)
     except Exception as e:
         logging.error(f"Erreur lors du traitement de la MR: {e}")
