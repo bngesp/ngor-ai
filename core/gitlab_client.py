@@ -7,7 +7,6 @@ from config.settings import GITLAB_API_BASE_URL, GITLAB_PROJECT_ID, HEADERS
 def get_changed_files(mr_iid):
     url = f"{GITLAB_API_BASE_URL}/projects/{GITLAB_PROJECT_ID}/merge_requests/{mr_iid}/changes"
     response = requests.get(url, headers=HEADERS)
-    logging.info(f"Récupération des fichiers modifiés pour la MR {mr_iid}")
     if response.status_code != 200:
         logging.error(f"Erreur GitLab: {response.status_code} - {response.text}")
         return []
