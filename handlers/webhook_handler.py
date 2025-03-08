@@ -28,7 +28,7 @@ async def webhook(request: Request):
         #     head_sha=mr_data['diff_refs']['head_sha']
         # )
 
-        process_merge_request(mr)
+        # process_merge_request(mr)
     except Exception as e:
         logging.error(f"Erreur lors du traitement de la MR: {e}")
 
