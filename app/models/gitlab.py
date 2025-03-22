@@ -73,7 +73,7 @@ class MergeRequestEvent(BaseModel):
 class CodeComment(BaseModel):
     """Code review comment model"""
     note: str
-    path: str
+    path: Optional[str] = None
     line: Optional[int] = None
     line_type: str = "new"  # "new" or "old"
     position: Optional[Dict[str, Any]] = None
