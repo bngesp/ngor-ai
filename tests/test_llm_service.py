@@ -59,13 +59,21 @@ class TestLLMService(unittest.TestCase):
         # Verify prompt contains the guidelines
         self.assertIn("Use PEP8", prompt)
     
-    @patch('openai.ChatCompletion.create')
-    def test_get_llm_response(self, mock_create):
-        # Mock OpenAI response
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "Test response"
-        mock_create.return_value = mock_response
+    @patch('app.utils.llm_service.OpenAI')
+    def test_get_llm_response(self, mock_openai):
+        # Mock OpenAI client and response
+        mock_client = MagicMock()
+        mock_openai.return_value = mock_client
+        
+        mock_completion = MagicMock()
+        mock_client.chat.completions.create.return_value = mock_completion
+        
+        mock_choice = MagicMock()
+        mock_completion.choices = [mock_choice]
+        mock_choice.message.content = "Test response"
+        
+        # Replace the client with our mock
+        self.llm_service.client = mock_client
         
         # Call the method
         result = self.llm_service._get_llm_response("Test prompt")
@@ -74,14 +82,14 @@ class TestLLMService(unittest.TestCase):
         self.assertEqual(result, "Test response")
         
         # Verify OpenAI was called with the correct parameters
-        mock_create.assert_called_once()
-        args, kwargs = mock_create.call_args
+        mock_client.chat.completions.create.assert_called_once()
+        args, kwargs = mock_client.chat.completions.create.call_args
         self.assertEqual(kwargs['model'], "gpt-4")
         self.assertEqual(kwargs['temperature'], 0.1)
         self.assertEqual(kwargs['max_tokens'], 2000)
         
         # Test handling of exceptions
-        mock_create.side_effect = Exception("API error")
+        mock_client.chat.completions.create.side_effect = Exception("API error")
         result = self.llm_service._get_llm_response("Test prompt")
         self.assertEqual(result, "[]")
     
@@ -128,7 +136,9 @@ class TestLLMService(unittest.TestCase):
         response = "Not JSON"
         comments = self.llm_service._process_review_response(response, change)
         
+        # Now validate that we get a general error comment
         self.assertEqual(len(comments), 1)
+        self.assertEqual(comments[0].path, change.new_path)
         self.assertIn("unable to process", comments[0].note)
 
 if __name__ == '__main__':

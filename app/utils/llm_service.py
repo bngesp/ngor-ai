@@ -1,6 +1,6 @@
 import os
 import json
-import openai
+from openai import OpenAI
 from typing import List, Dict, Any, Optional
 from app.models.config import LLMConfig
 from app.models.gitlab import Change, CodeComment
@@ -10,7 +10,7 @@ class LLMService:
     
     def __init__(self, config: LLMConfig):
         self.config = config
-        openai.api_key = config.api_key
+        self.client = OpenAI(api_key=config.api_key)
         self.model = config.model_name
         self.max_tokens = config.max_tokens
         self.temperature = config.temperature
@@ -99,7 +99,7 @@ class LLMService:
     def _get_llm_response(self, prompt: str) -> str:
         """Get a response from the LLM API"""
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are a code review assistant that focuses on providing constructive feedback on code changes."},
@@ -134,6 +134,9 @@ class LLMService:
         except Exception as e:
             # If we can't parse the response, create a general comment
             print(f"Error processing LLM response: {e}")
+        
+        # If no comments were created, add a general error comment
+        if not comments and not response.strip() == "[]":
             comment = CodeComment(
                 note=f"Code review assistant was unable to process this file properly. Please review manually.",
                 path=change.new_path
